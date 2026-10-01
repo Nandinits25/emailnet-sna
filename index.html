@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EMAILNET — Email Communication Network Analysis | Department 3</title>
+  <meta name="description" content="Interactive Social Network Analysis (SNA) application for Department 3 email communication network based on Stanford SNAP dataset.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <!-- Vendor Libraries (Bundled Locally for 100% Offline Reliability) -->
+  <script src="cytoscape.min.js"></script>
+  <script src="chart.umd.min.js"></script>
+  <!-- Precomputed Dataset Artifacts -->
+  <script src="network_data.js"></script>
+</head>
+<body class="app-body">
+
+  <!-- Top Application Navigation Bar -->
+  <header class="app-navbar" id="app-navbar">
+    <div class="nav-brand-section">
+      <div class="brand-logo">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="18" cy="5" r="3"></circle>
+          <circle cx="6" cy="12" r="3"></circle>
+          <circle cx="18" cy="19" r="3"></circle>
+          <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+          <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+        </svg>
+      </div>
+      <div class="brand-titles">
+        <span class="brand-name">EMAILNET</span>
+        <span class="brand-sub">Dept 3 Communication Network</span>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs (7 Required Pages) -->
+    <nav class="nav-links-menu" id="nav-tabs">
+      <button class="nav-tab active" data-page="page-overview">
+        <span class="tab-num">1</span> Overview
+      </button>
+      <button class="nav-tab" data-page="page-explorer">
+        <span class="tab-num">2</span> Network Explorer
+      </button>
+      <button class="nav-tab" data-page="page-centrality">
+        <span class="tab-num">3</span> Centrality Analysis
+      </button>
+      <button class="nav-tab" data-page="page-metrics">
+        <span class="tab-num">4</span> Network Metrics
+      </button>
+      <button class="nav-tab" data-page="page-node-explorer">
+        <span class="tab-num">5</span> Node Explorer
+      </button>
+      <button class="nav-tab" data-page="page-central-nodes">
+        <span class="tab-num">6</span> Central Nodes
+      </button>
+      <button class="nav-tab" data-page="page-report">
+        <span class="tab-num">7</span> Academic Report
+      </button>
+    </nav>
+
+    <!-- Global Quick Search & Actions -->
+    <div class="nav-quick-actions">
+      <div class="nav-search-wrap">
+        <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" id="global-node-search" placeholder="Search Node ID..." autocomplete="off">
+        <div id="search-suggestions" class="search-dropdown hidden"></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Viewport Router -->
+  <main class="app-viewport">
+
+    <!-- ========================================================
+         PAGE 1: OVERVIEW
+         ======================================================== -->
+    <section class="app-page active" id="page-overview">
+      <div class="page-container">
+        
+        <!-- Hero Header -->
+        <div class="overview-hero">
+          <div class="hero-badge">Social Network Analysis • Activity 1</div>
+          <h1 class="hero-title">EMAILNET</h1>
+          <h2 class="hero-subtitle">Email Communication Network — Department 3</h2>
+          <p class="hero-desc">
+            Interactive analysis of an organizational email communication network using Social Network Analysis.
+          </p>
+        </div>
+
+        <!-- Metric Cards -->
+        <div class="metrics-summary-grid">
+          <div class="metric-card card-nodes" onclick="navigateToPage('page-explorer')">
+            <div class="metric-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="7" r="4"></circle><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path></svg>
+            </div>
+            <div class="metric-val" id="metric-nodes">89</div>
+            <div class="metric-label">Nodes (Individuals)</div>
+            <div class="metric-footnote">Anonymous IDs 0 to 88</div>
+          </div>
+
+          <div class="metric-card card-edges" onclick="navigateToPage('page-explorer')">
+            <div class="metric-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+            </div>
+            <div class="metric-val" id="metric-edges">1,506</div>
+            <div class="metric-label">Directed Connections</div>
+            <div class="metric-footnote">Unique directed edges ($u \rightarrow v$)</div>
+          </div>
+
+          <div class="metric-card card-records">
+            <div class="metric-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+            </div>
+            <div class="metric-val" id="metric-records">12,216</div>
+            <div class="metric-label">Email Records</div>
+            <div class="metric-footnote">Raw interaction volume logged</div>
+          </div>
+
+          <div class="metric-card card-reciprocity" onclick="navigateToPage('page-metrics')">
+            <div class="metric-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"></polyline><polyline points="23 20 23 14 17 14"></polyline><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path></svg>
+            </div>
+            <div class="metric-val" id="metric-reciprocity">70.78%</div>
+            <div class="metric-label">Reciprocity</div>
+            <div class="metric-footnote">1,066 mutual directed ties</div>
+          </div>
+
+          <div class="metric-card card-transitivity" onclick="navigateToPage('page-metrics')">
+            <div class="metric-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 22 22 22"></polygon></svg>
+            </div>
+            <div class="metric-val" id="metric-transitivity">36.88%</div>
+            <div class="metric-label">Transitivity</div>
+            <div class="metric-footnote">Triadic clustering coefficient</div>
+          </div>
+        </div>
+
+        <!-- Network Interactive Launch Preview -->
+        <div class="overview-preview-card">
+          <div class="preview-header">
+            <div class="preview-title-wrap">
+              <h3>Network Topology Preview</h3>
+              <p>Force-directed layout of 89 individuals and 1,506 directed email channels</p>
+            </div>
+            <button class="btn-primary" onclick="navigateToPage('page-explorer')">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+              Open Interactive Network Explorer
+            </button>
+          </div>
+          <div class="preview-img-container" onclick="navigateToPage('page-explorer')">
+            <img src="email_network_visualization.png" alt="Email Communication Network – Department 3" class="preview-img">
+            <div class="preview-overlay">
+              <span class="preview-launch-badge">Click to Launch Full Interactive Explorer &rarr;</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dataset Information Section -->
+        <div class="dataset-info-box">
+          <div class="dataset-info-header">
+            <h4>Dataset Specification</h4>
+            <span class="info-tag">Stanford SNAP Source</span>
+          </div>
+          <div class="dataset-info-grid">
+            <div class="ds-item">
+              <span class="ds-label">Dataset:</span>
+              <span class="ds-val">Email-Eu-Core Temporal Department 3</span>
+            </div>
+            <div class="ds-item">
+              <span class="ds-label">Source:</span>
+              <span class="ds-val">Stanford Large Network Dataset Collection (SNAP)</span>
+            </div>
+            <div class="ds-item">
+              <span class="ds-label">Network Type:</span>
+              <span class="ds-val">Directed, Static Multi-interaction Collapse</span>
+            </div>
+            <div class="ds-item">
+              <span class="ds-label">Nodes ($|V|$):</span>
+              <span class="ds-val"><strong>89</strong> unique anonymous members</span>
+            </div>
+            <div class="ds-item">
+              <span class="ds-label">Directed Edges ($|E|$):</span>
+              <span class="ds-val"><strong>1,506</strong> unique communication channels</span>
+            </div>
+            <div class="ds-item">
+              <span class="ds-label">Raw Volume:</span>
+              <span class="ds-val"><strong>12,216</strong> timestamps recorded</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================================
+         PAGE 2: NETWORK EXPLORER
+         ======================================================== -->
+    <section class="app-page" id="page-explorer">
+      <div class="explorer-layout">
+        
+        <!-- Graph Workspace Toolbar -->
+        <div class="explorer-toolbar">
+          <div class="toolbar-group">
+            <span class="toolbar-title">Network Explorer</span>
+            <span class="status-pill"><span class="dot-online"></span> 89 Nodes &bull; 1,506 Directed Edges</span>
+          </div>
+
+          <div class="toolbar-group">
+            <button class="tool-btn" id="btn-zoom-in" title="Zoom In">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+            </button>
+            <button class="tool-btn" id="btn-zoom-out" title="Zoom Out">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+            </button>
+            <button class="tool-btn" id="btn-fit" title="Fit to Screen / Reset View">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
+              Fit View
+            </button>
+            <button class="tool-btn" id="btn-reset-selection" title="Clear Selection">
+              Reset Highlights
+            </button>
+          </div>
+
+          <div class="toolbar-group">
+            <label for="select-layout" class="tool-label">Layout:</label>
+            <select id="select-layout" class="tool-select">
+              <option value="preset">Force-Directed (NetworkX Spring)</option>
+              <option value="concentric">Concentric (Degree Centrality)</option>
+              <option value="circle">Circular Structure</option>
+              <option value="cose">Dynamic Force (COSE)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Cytoscape Graph Canvas -->
+        <div class="graph-canvas-wrapper">
+          <div id="cy-network" class="cy-container"></div>
+          
+          <!-- Graph Legend -->
+          <div class="graph-legend-overlay">
+            <div class="legend-header">Visual Scale &amp; Legend</div>
+            <div class="legend-item">
+              <span class="legend-dot size-large"></span>
+              <span>High Degree Centrality (&gt;0.90)</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-dot size-med"></span>
+              <span>Moderate Centrality (0.40 - 0.90)</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-dot size-small"></span>
+              <span>Peripheral Centrality (&lt;0.40)</span>
+            </div>
+            <div class="legend-divider"></div>
+            <div class="legend-item">
+              <span class="legend-line edge-out"></span>
+              <span>Outgoing Email ($u \rightarrow v$)</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-line edge-in"></span>
+              <span>Incoming Email ($v \rightarrow u$)</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-line edge-mutual"></span>
+              <span>Mutual Bilateral Ties</span>
+            </div>
+            <div class="legend-tip">
+              &bull; Click any node to highlight connections<br>
+              &bull; Drag nodes or scroll to zoom
+            </div>
+          </div>
+
+          <!-- Quick Node Inspector Floating Card -->
+          <div class="quick-node-card hidden" id="quick-node-card">
+            <div class="quick-card-header">
+              <span class="quick-node-title" id="quick-node-title">Node --</span>
+              <button class="quick-card-close" id="btn-quick-close">&times;</button>
+            </div>
+            <div class="quick-card-metrics" id="quick-card-metrics">
+              <!-- Dynamically populated -->
+            </div>
+            <div class="quick-card-actions">
+              <button class="btn-sm-primary" id="btn-quick-inspect">Open in Node Explorer &rarr;</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================================
+         PAGE 3: CENTRALITY ANALYSIS
+         ======================================================== -->
+    <section class="app-page" id="page-centrality">
+      <div class="page-container">
+        
+        <div class="page-heading">
+          <h2>Centrality Analysis</h2>
+          <p>Examine top structurally central individuals across Degree, Closeness, and Betweenness centrality.</p>
+        </div>
+
+        <!-- Centrality Sub-Tabs -->
+        <div class="sub-nav-tabs">
+          <button class="sub-tab active" data-centrality="degree">Degree Centrality</button>
+          <button class="sub-tab" data-centrality="closeness">Closeness Centrality</button>
+          <button class="sub-tab" data-centrality="betweenness">Betweenness Centrality</button>
+        </div>
+
+        <!-- Degree Centrality Panel -->
+        <div class="centrality-panel active" id="panel-degree">
+          <div class="panel-two-col">
+            <!-- Table -->
+            <div class="panel-table-wrap">
+              <div class="table-title-bar">
+                <h3>Top 10 Nodes by Degree Centrality</h3>
+                <span class="table-hint">Click a row to highlight in Network Explorer</span>
+              </div>
+              <table class="modern-table">
+                <thead>
+                  <tr>
+                    <th>Rank</th>
+                    <th>Node ID</th>
+                    <th>Degree Centrality</th>
+                    <th>In-Degree</th>
+                    <th>Out-Degree</th>
+                    <th>Total</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-top10-degree">
+                  <!-- Populated dynamically via JS -->
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Bar Chart -->
+            <div class="panel-chart-wrap">
+              <div class="chart-header">
+                <h3>Degree Centrality Distribution (Top 10)</h3>
+              </div>
+              <div class="chart-canvas-container">
+                <canvas id="chart-degree"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Closeness Centrality Panel -->
+        <div class="centrality-panel" id="panel-closeness">
+          <div class="panel-two-col">
+            <!-- Table -->
+            <div class="panel-table-wrap">
+              <div class="table-title-bar">
+                <h3>Top 10 Nodes by Closeness Centrality</h3>
+                <span class="table-hint">Click a row to highlight in Network Explorer</span>
+              </div>
+              <table class="modern-table">
+                <thead>
+                  <tr>
+                    <th>Rank</th>
+                    <th>Node ID</th>
+                    <th>Closeness Centrality</th>
+                    <th>In-Degree</th>
+                    <th>Out-Degree</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-top10-closeness">
+                  <!-- Populated dynamically via JS -->
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Bar Chart -->
+            <div class="panel-chart-wrap">
+              <div class="chart-header">
+                <h3>Closeness Centrality Distribution (Top 10)</h3>
+              </div>
+              <div class="chart-canvas-container">
+                <canvas id="chart-closeness"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Betweenness Centrality Panel -->
+        <div class="centrality-panel" id="panel-betweenness">
+          <div class="panel-two-col">
+            <!-- Table -->
+            <div class="panel-table-wrap">
+              <div class="table-title-bar">
+                <h3>Top 10 Nodes by Betweenness Centrality</h3>
+                <span class="table-hint">Click a row to highlight in Network Explorer</span>
+              </div>
+              <table class="modern-table">
+                <thead>
+                  <tr>
+                    <th>Rank</th>
+                    <th>Node ID</th>
+                    <th>Betweenness Centrality</th>
+                    <th>In-Degree</th>
+                    <th>Out-Degree</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-top10-betweenness">
+                  <!-- Populated dynamically via JS -->
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Bar Chart -->
+            <div class="panel-chart-wrap">
+              <div class="chart-header">
+                <h3>Betweenness Centrality Distribution (Top 10)</h3>
+              </div>
+              <div class="chart-canvas-container">
+                <canvas id="chart-betweenness"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================================
+         PAGE 4: NETWORK METRICS
+         ======================================================== -->
+    <section class="app-page" id="page-metrics">
+      <div class="page-container">
+        
+        <div class="page-heading">
+          <h2>Network Metrics Dashboard</h2>
+          <p>Global macroscopic cohesion, reciprocity, and degree mixing patterns for Department 3.</p>
+        </div>
+
+        <div class="macro-metrics-grid">
+          
+          <!-- Metric 1: Density -->
+          <div class="macro-card">
+            <div class="macro-card-top">
+              <span class="metric-category">Global Density</span>
+              <span class="macro-val">0.1923</span>
+            </div>
+            <h4>Network Density</h4>
+            <p class="macro-desc">
+              Network density measures the ratio of actual directed communication channels to the maximum possible number of directed connections between all 89 individuals:
+            </p>
+            <div class="macro-formula">
+              $$D = \frac{|E|}{|V|(|V| - 1)} = \frac{1,506}{89 \times 88} \approx 0.1923 \text{ (19.23\%)}$$
+            </div>
+            <p class="macro-subtext">
+              Approximately 1 in every 5 potential directed communication channels exists in Department 3.
+            </p>
+          </div>
+
+          <!-- Metric 2: Transitivity -->
+          <div class="macro-card">
+            <div class="macro-card-top">
+              <span class="metric-category">Clustering / Triads</span>
+              <span class="macro-val">0.3688</span>
+            </div>
+            <h4>Network Transitivity</h4>
+            <p class="macro-desc">
+              Transitivity measures the tendency of connected nodes to form closed triangles (triadic closure). It quantifies the fraction of all two-step paths that are closed by a directed edge:
+            </p>
+            <div class="macro-formula">
+              $$T = 3 \times \frac{\#\text{ Triangles}}{\#\text{ Triads}} = 0.3688 \text{ (36.88\%)}$$
+            </div>
+            <p class="macro-subtext">
+              A transitivity of 36.88% confirms substantial localized clustering into collaborative research sub-teams.
+            </p>
+          </div>
+
+          <!-- Metric 3: Reciprocity -->
+          <div class="macro-card highlight-blue">
+            <div class="macro-card-top">
+              <span class="metric-category">Bilateral Ties</span>
+              <span class="macro-val">0.7078</span>
+            </div>
+            <h4>Network Reciprocity</h4>
+            <p class="macro-desc">
+              Network reciprocity measures the extent to which directed connections are mutual across communication partners ($A \rightarrow B$ and $B \rightarrow A$):
+            </p>
+            <div class="macro-formula">
+              $$r = \frac{|E \cap E^T|}{|E|} = \frac{1,066}{1,506} \approx 0.7078 \text{ (70.78\%)}$$
+            </div>
+            <p class="macro-subtext">
+              Out of 1,506 directed ties, 1,066 edges belong to mutual reciprocal pairs (533 bidirectional pairs).
+            </p>
+          </div>
+
+          <!-- Metric 4: Degree Assortativity -->
+          <div class="macro-card highlight-purple">
+            <div class="macro-card-top">
+              <span class="metric-category">Degree Correlation</span>
+              <span class="macro-val">-0.1387</span>
+            </div>
+            <h4>Degree Assortativity</h4>
+            <p class="macro-desc">
+              Degree assortativity evaluates the correlation between degrees of connected nodes across directed communication channels:
+            </p>
+            <div class="macro-formula">
+              $$r_{\text{deg}} = \text{Corr}(k_{\text{source}}^{\text{out}}, k_{\text{target}}^{\text{in}}) = -0.1387$$
+            </div>
+            <p class="macro-subtext">
+              The negative value indicates mild degree disassortativity: a tendency for nodes with different connectivity levels to be connected. (It is neither good nor bad; it reflects functional cross-tier connectivity).
+            </p>
+          </div>
+
+          <!-- Metric 5: Connected Components -->
+          <div class="macro-card full-width">
+            <div class="macro-card-top">
+              <span class="metric-category">Component Topology</span>
+              <span class="macro-val">1 WCC &bull; 11 SCCs</span>
+            </div>
+            <h4>Connected Components Analysis</h4>
+            <div class="components-breakdown">
+              <div class="comp-col">
+                <strong>Weakly Connected Components (WCC):</strong>
+                <span class="comp-val">1 Component (89 nodes)</span>
+                <p>When ignoring edge direction, all 89 individuals form a single unified connected graph with no isolated subgraphs.</p>
+              </div>
+              <div class="comp-col">
+                <strong>Strongly Connected Components (SCC):</strong>
+                <span class="comp-val">11 Components (Largest: 79 nodes)</span>
+                <p>Accounting for directed paths, 79 individuals form a mutually reachable core. The remaining 10 nodes are peripheral receivers with an out-degree of 0.</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================================
+         PAGE 5: NODE EXPLORER
+         ======================================================== -->
+    <section class="app-page" id="page-node-explorer">
+      <div class="page-container">
+        
+        <div class="page-heading">
+          <h2>Node Explorer</h2>
+          <p>Inspect any individual node's connectivity profile, centralities, and direct communication partners.</p>
+        </div>
+
+        <!-- Node Selector & Search Bar -->
+        <div class="node-search-panel">
+          <div class="search-input-group">
+            <label for="node-id-input">Search Node ID (0 to 88):</label>
+            <div class="input-with-button">
+              <input type="number" id="node-id-input" min="0" max="88" placeholder="e.g. 49" value="49">
+              <button class="btn-primary" id="btn-inspect-node">Inspect Node</button>
+            </div>
+          </div>
+
+          <!-- Quick Access Chips for Top Structurally Central Nodes -->
+          <div class="quick-chips">
+            <span class="chip-label">Quick Select Top Central Nodes:</span>
+            <button class="chip-btn" data-node="49">Node 49</button>
+            <button class="chip-btn" data-node="25">Node 25</button>
+            <button class="chip-btn" data-node="60">Node 60</button>
+            <button class="chip-btn" data-node="35">Node 35</button>
+            <button class="chip-btn" data-node="4">Node 4</button>
+            <button class="chip-btn" data-node="54">Node 54</button>
+            <button class="chip-btn" data-node="85">Node 85</button>
+            <button class="chip-btn" data-node="48">Node 48</button>
+          </div>
+        </div>
+
+        <!-- Selected Node Profile View -->
+        <div class="node-profile-card" id="node-profile-container">
+          <!-- Dynamically Populated by app.js -->
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================================
+         PAGE 6: CENTRAL NODES
+         ======================================================== -->
+    <section class="app-page" id="page-central-nodes">
+      <div class="page-container">
+        
+        <div class="page-heading">
+          <h2>Top Structurally Central Nodes</h2>
+          <p>Comparative synthesis of the top structurally central nodes across each centrality dimension.</p>
+        </div>
+
+        <!-- Three Centrality Comparison Cards -->
+        <div class="central-nodes-grid">
+          
+          <!-- Column 1: Degree Centrality -->
+          <div class="central-measure-card">
+            <div class="measure-card-header degree-theme">
+              <span class="rank-tag">Measure 1</span>
+              <h3>Degree Centrality</h3>
+              <p>Total connection volume ($C_D$)</p>
+            </div>
+            <div class="central-node-list" id="central-list-degree">
+              <!-- Populated dynamically -->
+              <div class="central-row rank-1" onclick="jumpToNode(49)">
+                <span class="central-rank">#1</span>
+                <span class="central-id">Node 49</span>
+                <span class="central-score">1.1136</span>
+              </div>
+              <div class="central-row rank-2" onclick="jumpToNode(25)">
+                <span class="central-rank">#2</span>
+                <span class="central-id">Node 25</span>
+                <span class="central-score">1.0682</span>
+              </div>
+              <div class="central-row rank-3" onclick="jumpToNode(60)">
+                <span class="central-rank">#3</span>
+                <span class="central-id">Node 60</span>
+                <span class="central-score">1.0568</span>
+              </div>
+              <div class="central-row" onclick="jumpToNode(35)">
+                <span class="central-rank">#4</span>
+                <span class="central-id">Node 35</span>
+                <span class="central-score">0.9432</span>
+              </div>
+              <div class="central-row" onclick="jumpToNode(4)">
+                <span class="central-rank">#5</span>
+                <span class="central-id">Node 4</span>
+                <span class="central-score">0.9205</span>
+              </div>
+            </div>
+            <div class="measure-card-footer">
+              Node 49 holds the highest communication volume (98 direct ties: 42 in, 56 out).
+            </div>
+          </div>
+
+          <!-- Column 2: Closeness Centrality -->
+          <div class="central-measure-card">
+            <div class="measure-card-header closeness-theme">
+              <span class="rank-tag">Measure 2</span>
+              <h3>Closeness Centrality</h3>
+              <p>Shortest incoming distance ($C_C$)</p>
+            </div>
+            <div class="central-node-list" id="central-list-closeness">
+              <div class="central-row rank-1" onclick="jumpToNode(25)">
+                <span class="central-rank">#1</span>
+                <span class="central-id">Node 25</span>
+                <span class="central-score">0.6285</span>
+              </div>
+              <div class="central-row rank-2" onclick="jumpToNode(49)">
+                <span class="central-rank">#2</span>
+                <span class="central-id">Node 49</span>
+                <span class="central-score">0.6065</span>
+              </div>
+              <div class="central-row rank-3" onclick="jumpToNode(60)">
+                <span class="central-rank">#3</span>
+                <span class="central-id">Node 60</span>
+                <span class="central-score">0.6012</span>
+              </div>
+              <div class="central-row" onclick="jumpToNode(4)">
+                <span class="central-rank">#4</span>
+                <span class="central-id">Node 4</span>
+                <span class="central-score">0.5761</span>
+              </div>
+              <div class="central-row" onclick="jumpToNode(54)">
+                <span class="central-rank">#5</span>
+                <span class="central-id">Node 54</span>
+                <span class="central-score">0.5531</span>
+              </div>
+            </div>
+            <div class="measure-card-footer">
+              Node 25 possesses the shortest average path distance from all departmental peers.
+            </div>
+          </div>
+
+          <!-- Column 3: Betweenness Centrality -->
+          <div class="central-measure-card">
+            <div class="measure-card-header betweenness-theme">
+              <span class="rank-tag">Measure 3</span>
+              <h3>Betweenness Centrality</h3>
+              <p>Information broker power ($C_B$)</p>
+            </div>
+            <div class="central-node-list" id="central-list-betweenness">
+              <div class="central-row rank-1" onclick="jumpToNode(60)">
+                <span class="central-rank">#1</span>
+                <span class="central-id">Node 60</span>
+                <span class="central-score">0.0661</span>
+              </div>
+              <div class="central-row rank-2" onclick="jumpToNode(49)">
+                <span class="central-rank">#2</span>
+                <span class="central-id">Node 49</span>
+                <span class="central-score">0.0600</span>
+              </div>
+              <div class="central-row rank-3" onclick="jumpToNode(25)">
+                <span class="central-rank">#3</span>
+                <span class="central-id">Node 25</span>
+                <span class="central-score">0.0571</span>
+              </div>
+              <div class="central-row" onclick="jumpToNode(85)">
+                <span class="central-rank">#4</span>
+                <span class="central-id">Node 85</span>
+                <span class="central-score">0.0454</span>
+              </div>
+              <div class="central-row" onclick="jumpToNode(4)">
+                <span class="central-rank">#5</span>
+                <span class="central-id">Node 4</span>
+                <span class="central-score">0.0412</span>
+              </div>
+            </div>
+            <div class="measure-card-footer">
+              Node 60 sits on the highest fraction of shortest paths connecting distinct subgroups.
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Compact Comparison Matrix -->
+        <div class="comparison-matrix-card">
+          <div class="matrix-header">
+            <h3>Centrality Comparison Matrix (Top 5)</h3>
+            <span class="matrix-badge">Calculated Values from Dataset</span>
+          </div>
+          <table class="modern-table">
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>Degree Centrality</th>
+                <th>Closeness Centrality</th>
+                <th>Betweenness Centrality</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="highlight-row">
+                <td><strong>Rank 1</strong></td>
+                <td><span class="node-tag" onclick="jumpToNode(49)">Node 49</span> <code>1.1136</code></td>
+                <td><span class="node-tag" onclick="jumpToNode(25)">Node 25</span> <code>0.6285</code></td>
+                <td><span class="node-tag" onclick="jumpToNode(60)">Node 60</span> <code>0.0661</code></td>
+              </tr>
+              <tr>
+                <td><strong>Rank 2</strong></td>
+                <td><span class="node-tag" onclick="jumpToNode(25)">Node 25</span> <code>1.0682</code></td>
+                <td><span class="node-tag" onclick="jumpToNode(49)">Node 49</span> <code>0.6065</code></td>
+                <td><span class="node-tag" onclick="jumpToNode(49)">Node 49</span> <code>0.0600</code></td>
+              </tr>
+              <tr>
+                <td><strong>Rank 3</strong></td>
+                <td><span class="node-tag" onclick="jumpToNode(60)">Node 60</span> <code>1.0568</code></td>
+                <td><span class="node-tag" onclick="jumpToNode(60)">Node 60</span> <code>0.6012</code></td>
+                <td><span class="node-tag" onclick="jumpToNode(25)">Node 25</span> <code>0.0571</code></td>
+              </tr>
+              <tr>
+                <td><strong>Rank 4</strong></td>
+                <td><span class="node-tag" onclick="jumpToNode(35)">Node 35</span> <code>0.9432</code></td>
+                <td><span class="node-tag" onclick="jumpToNode(4)">Node 4</span> <code>0.5761</code></td>
+                <td><span class="node-tag" onclick="jumpToNode(85)">Node 85</span> <code>0.0454</code></td>
+              </tr>
+              <tr>
+                <td><strong>Rank 5</strong></td>
+                <td><span class="node-tag" onclick="jumpToNode(4)">Node 4</span> <code>0.9205</code></td>
+                <td><span class="node-tag" onclick="jumpToNode(54)">Node 54</span> <code>0.5531</code></td>
+                <td><span class="node-tag" onclick="jumpToNode(4)">Node 4</span> <code>0.0412</code></td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="matrix-footnote">
+            <strong>Key Finding:</strong> Nodes <strong>49, 25, and 60</strong> consistently occupy the top three positions across all three centrality metrics, identifying them as the structural core of Department 3.
+          </p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================================
+         PAGE 7: ACADEMIC REPORT
+         ======================================================== -->
+    <section class="app-page" id="page-report">
+      <div class="report-wrapper">
+        
+        <!-- Report Controls -->
+        <div class="report-controls">
+          <div class="report-badge">College Social Network Analysis • Activity 1 (10 Marks)</div>
+          <button class="btn-print-report" onclick="window.print()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+            Print / Save as PDF
+          </button>
+        </div>
+
+        <article class="academic-paper-document">
+          <header class="doc-header">
+            <h1 class="doc-title">Email Communication Network Analysis and Identification of Structurally Central Individuals</h1>
+            <div class="doc-meta">
+              <span>Social Network Analysis (SNA) Activity 1</span>
+              <span>&bull;</span>
+              <span>Dataset: Email-Eu-Core Temporal Department 3 (Stanford SNAP)</span>
+            </div>
+          </header>
+
+          <!-- 1. Activity 1: Network Visualization and Analysis -->
+          <div class="doc-section">
+            <h2 class="doc-sec-heading">1. Activity 1: Network Visualization and Analysis</h2>
+            <p>
+              Investigate the structural topology of an organizational email communication network (Department 3), identify structurally central individuals using multiple centrality measures, assess network clustering, reciprocity, and degree mixing patterns.
+            </p>
+          </div>
+
+          <!-- 2. Objective -->
+          <div class="doc-section">
+            <h2 class="doc-sec-heading">2. Objective</h2>
+            <p>
+              To construct a directed network of email exchanges among Department 3 researchers, compute exact node-level centralities (degree, closeness, betweenness) and macro-level network properties (transitivity, reciprocity, assortativity), and explain the communication hierarchy and information diffusion dynamics.
+            </p>
+          </div>
+
+          <!-- 3. Tools & Dataset -->
+          <div class="doc-section">
+            <h2 class="doc-sec-heading">3. Tools & Dataset</h2>
+            <ul class="doc-list">
+              <li><strong>Python:</strong> Core computational language for parsing and graph orchestration.</li>
+              <li><strong>NetworkX:</strong> Graph analytics framework for directed network construction, pathfinding, and centrality calculations.</li>
+              <li><strong>Pandas:</strong> High-performance data manipulation for tabular email logs.</li>
+              <li><strong>Matplotlib:</strong> Static publication-grade visualization engine.</li>
+              <li><strong>Interactive Graph Library (Cytoscape.js):</strong> Dynamic force-directed graph rendering with zoom, pan, drag, and node inspection.</li>
+              <li><strong>Email-Eu-Core Temporal Department 3:</strong> Verified empirical dataset with 89 unique nodes, 1,506 directed edges, and 12,216 records.</li>
+              <li><strong>Stanford SNAP:</strong> Stanford Large Network Dataset Collection source of truth.</li>
+            </ul>
+          </div>
+
+          <!-- 4. Methodology -->
+          <div class="doc-section">
+            <h2 class="doc-sec-heading">4. Methodology</h2>
+            <div class="methodology-flow-doc">
+              Dataset (12,216 records) &rarr; Preprocessing &rarr; Directed Network Construction (89 nodes, 1,506 edges) &rarr; Network Visualization &rarr; Degree Centrality &rarr; Closeness Centrality &rarr; Betweenness Centrality &rarr; Transitivity &rarr; Reciprocity &rarr; Assortativity &rarr; Interpretation
+            </div>
+          </div>
+
+          <!-- 5. Results & Conclusion -->
+          <div class="doc-section">
+            <h2 class="doc-sec-heading">5. Results & Conclusion</h2>
+            
+            <h3 class="doc-subheading">Network Statistics</h3>
+            <table class="doc-table">
+              <thead>
+                <tr><th>Metric</th><th>Calculated Value</th><th>Interpretation</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Nodes ($|V|$)</td><td>89</td><td>Active individuals in Department 3</td></tr>
+                <tr><td>Directed Edges ($|E|$)</td><td>1,506</td><td>Unique directed communication channels</td></tr>
+                <tr><td>Email Records</td><td>12,216</td><td>Cumulative emails logged over the observation period</td></tr>
+                <tr><td>Network Density</td><td>0.1923 (19.23%)</td><td>Ratio of actual directed ties to possible ties</td></tr>
+                <tr><td>Mutual Directed Edges</td><td>1,066</td><td>533 reciprocal pairs communicating both ways</td></tr>
+                <tr><td>Weakly Connected Components</td><td>1</td><td>All 89 nodes form a single connected component</td></tr>
+                <tr><td>Strongly Connected Core</td><td>79 nodes</td><td>79 mutually reachable nodes; 10 peripheral receiver nodes</td></tr>
+              </tbody>
+            </table>
+
+            <h3 class="doc-subheading">Centrality Results (Top Structurally Central Nodes)</h3>
+            <table class="doc-table">
+              <thead>
+                <tr><th>Rank</th><th>Degree Centrality</th><th>Closeness Centrality</th><th>Betweenness Centrality</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>1</td><td>Node 49 (1.1136)</td><td>Node 25 (0.6285)</td><td>Node 60 (0.0661)</td></tr>
+                <tr><td>2</td><td>Node 25 (1.0682)</td><td>Node 49 (0.6065)</td><td>Node 49 (0.0600)</td></tr>
+                <tr><td>3</td><td>Node 60 (1.0568)</td><td>Node 60 (0.6012)</td><td>Node 25 (0.0571)</td></tr>
+                <tr><td>4</td><td>Node 35 (0.9432)</td><td>Node 4 (0.5761)</td><td>Node 85 (0.0454)</td></tr>
+                <tr><td>5</td><td>Node 4 (0.9205)</td><td>Node 54 (0.5531)</td><td>Node 4 (0.0412)</td></tr>
+              </tbody>
+            </table>
+
+            <h3 class="doc-subheading">Network Measures</h3>
+            <p><strong>Network Transitivity: 0.3688</strong><br>
+            <em>Interpretation:</em> Transitivity of 0.3688 indicates that 36.88% of potential directed triads form closed triangles. This demonstrates substantial localized clustering within Department 3.</p>
+
+            <p><strong>Network Reciprocity: 0.7078</strong><br>
+            <em>Interpretation:</em> Reciprocity of 0.7078 indicates that 70.78% of directed connections are mutual. Out of 1,506 directed ties, 1,066 edges belong to mutual reciprocal pairs (533 bidirectional pairs).</p>
+
+            <p><strong>Degree Assortativity: -0.1387</strong><br>
+            <em>Interpretation:</em> Degree assortativity of -0.1387 indicates mild degree disassortativity. This negative value demonstrates a tendency for nodes with different connectivity levels to be connected.</p>
+
+            <h3 class="doc-subheading">Conclusion</h3>
+            <p class="doc-conclusion-para">
+              The social network analysis of Department 3's email communications reveals a dense, cohesive, and highly reciprocal (70.78%) organizational network comprising 89 individuals and 1,506 directed ties. Centrality analysis definitively identifies Nodes 49, 25, and 60 as the structural anchors of the department, fulfilling complementary roles as the primary volume communicator, the most efficient receiver, and the essential boundary broker, respectively. A transitivity of 0.3688 confirms strong local team clustering, while the negative degree assortativity (-0.1387) reflects an accessible hierarchical structure where central leaders actively communicate across connectivity strata to coordinate departmental operations.
+            </p>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Modern Interactive Application Script -->
+  <script src="app.js"></script>
+</body>
+</html>
